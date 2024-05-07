@@ -1,114 +1,170 @@
 <script>
-    import { instance } from "@viz-js/viz"
     import { onMount } from "svelte"
-    import { textToDto } from '@ochuzor/todo.txt-parser';
+    import hotkeys from 'hotkeys-js'
+    import { generateSvg } from './todot.js'
+    export let data
 
-    let viz
+    const projects = [ "EG", "OG" ]
+    const contexts = [ "Planung" ]
+    let dialog
     let svg = { outerHTML: '' }
-    let todos = []
-    let ids = []
     let selected
+    let edititem = emptyItem()
+    let edititem_id = false
+
+    $: edges = Object.entries(data.todos).reduce((es, [id, i]) => i.p.reduce((es, p) => {
+        es[p] = [...(es[p] || []), id]
+        return es
+    }, es), {})
+
 
     onMount(init)
 
     async function init () {
-        await Promise.all([
-            loadTodos(),
-            initViz()
-        ])
+        initKeys()
         draw()
     }
 
-    async function initViz () {
-        viz = await instance()
+    function initKeys () {
+        hotkeys("Del", completeNode)
+        hotkeys("Enter", editNode)
     }
 
-    function textToDtoWD (entry) {
-        const i = textToDto(entry)
-        i.id = i.tags.filter(t => t.name == 'id').map(t => t.value)?.[0]
-        if (i.id === undefined) {
-            throw Error(`Item does not have an ID: ${entry}`)
+    function generateItemId(edititem) {
+        const primitve_id = Array.from(edititem.description
+            .normalize('NFKD')
+            .toLocaleLowerCase()
+            .replaceAll(/[:;<=>?@[\]^_`]/g, ''))
+            .map(char => char.codePointAt(0))
+            .filter(cp => (cp >= 48) && (cp <= 122) )
+            .map(cp => String.fromCodePoint(cp))
+            .slice(0, 32)
+            .join('')
+        return primitve_id
+    }
+
+    function completeNode () {
+        if (!selected) {
+            return
         }
-        if (i.id in ids) {
-            throw Error(`Item ID is duplicate: ${entry}`)
+        if (data.todos[selected.id].isCompleted) {
+            if (edges[selected.id].every(id => !data.todos[id].isCompleted)) {
+                data.todos[selected.id].isCompleted = false
+                select(null)
+            } else {
+                select(edges[selected.id].filter(id => data.todos[id].isCompleted)[0])
+            }
+        } else {
+            if (data.todos[selected.id].p.every(id => data.todos[id].isCompleted)) {
+                data.todos[selected.id].isCompleted = true
+                select(null)
+                draw()
+            } else {
+                select(data.todos[selected.id].p.filter(id => !data.todos[id].isCompleted)[0])
+            }
         }
-        ids.push(i)
-        i.p = i.tags.filter(t => t.name == 'p').map(t => t.value)
-        console.debug(i)
-        return i
     }
 
-    async function loadTodos () {
-        const response = await fetch('todo.txt')
-        const todotxt = await response.text()
-        ids = []
-        todos = todotxt.split("\n").filter(line => line.length > 0).map(textToDtoWD)
+    function emptyItem () {
+        const now = new Date()
+        const nowDate = now.toLocaleDateString("de", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        }).split('.').reverse().join('-')
+        return {
+            contexts: [],
+            dateOfCompletion: '',
+            dateOfCreation: nowDate,
+            description: '',
+            isCompleted: false,
+            p: [],
+            priority: '',
+            projects: [],
+            due: undefined,
+            tags: []
+        }
     }
 
-    function attributeList (attributeObject) {
-        return Object.entries(attributeObject).map(([k, v]) =>
-            `${k}="${Array.isArray(v) ? v.join(' '): v}"`
-        ).join(', ')
+    function editNode () {
+        console.log("Test");
+        if (selected) {
+            edititem_id = selected.id
+            edititem = data.todos[edititem_id]
+        }
+        console.log("Test")
+        dialog.showModal()
     }
 
-    function graph (nodes, edges) {
-        /*
-        ratio = "0.7071067811865476"
-        size = "8.2731, 11.7000"
-        resolution = "300"
-        */
-        return `digraph {
-    rankdir = "LR"
-    node [shape = "ellipse", fontsize = "10", fontname = "Lato regular", style="filled", fillcolor="white"]
-
-    ${Object.entries(nodes).map(([k, v]) => `${k} [${attributeList(v)}]`).join("\n    ")}
-
-    ${Object.entries(edges).map(([k, v]) => `${k} -> {${v.join(' ')}}`).join("\n    ")}
-}`
+    async function draw () {
+        svg = await generateSvg(edges, data.todos)
     }
 
-    function draw () {
-        const connections = {}
-        todos.forEach(i => i.p.forEach(p =>
-            connections[p] = [...(connections[p] || []), i.id]
-        ))
-
-        const dotcode = graph(
-            Object.fromEntries(todos.map(i => [i.id, {
-                id: i.id,
-                label: i.description,
-                class: [...i.projects, ...i.projects.map(p => `project${p}`), i.isCompleted ? 'completed': '']
-            }])),
-            connections
-        )
-        svg = viz.renderSVGElement(dotcode)
-
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        // Source: https://iros.github.io/patternfills/sample_svg.html
-        defs.innerHTML = `<pattern id="diagonal-stripe-3" patternUnits="userSpaceOnUse" width="10" height="10">
-            <image xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+CiAgPHBhdGggZmlsbD0iIzkwZWU5MCIgZD0iTTAgMGgxMHYxMEgweiIvPgogIDxwYXRoIHN0cm9rZT0iI2FkZDhlNiIgc3Ryb2tlLXdpZHRoPSIzIiBkPSJtLTEgMSAyLTJNMCAxMCAxMCAwTTkgMTFsMi0yIi8+Cjwvc3ZnPgo=" x="0" y="0" width="10" height="10">
-            </image>
-        <pattern`
-        svg.appendChild(defs)
+    function select(id) {
+        if (selected) {
+            selected.classList.remove('selected')
+        }
+        if (id === null) {
+            selected = null
+            return
+        }
+        if (id instanceof Element) {
+            selected = id
+        } else {
+            const node = document.querySelector(`#${id}`)
+            if (!node) {
+                throw Error(`Can not find node ${id}`)
+            }
+            selected = node
+        }
+        selected.classList.add('selected')
     }
 
     function klicked (pointerEvent) {
         const target = pointerEvent.target.closest('g')
 
-        selected?.classList.remove('selected')
-        selected = null
-
-        if (!target.classList.contains('node') || target.classList.contains('completed')) {
+        select(null)
+        if (!target.classList.contains('node')) {
             return
         }
+        select(target)
+    }
 
-        selected = target
-        selected.classList.add('selected')
+    async function updatItem (closeEvent) {
+        console.log(closeEvent)
+        if (closeEvent.target.returnValue === 'speichern') {
+            if (edititem_id === false) {
+                edititem_id = generateItemId(edititem)
+            }
+            data.todos[edititem_id] = edititem
+        } else if (closeEvent.target.returnValue === 'loeschen') {
+            delete data.todos[edititem_id]
+        }
+        edititem_id = false
+        edititem = emptyItem()
+        draw()
     }
 
 </script>
 
-<div on:click={klicked}>{@html svg.outerHTML}</div>
+<div>
+    <div on:click={klicked}>
+        {@html svg.outerHTML}
+    </div>
+    <dialog autofocus bind:this={dialog} on:close={updatItem}><form method="dialog">
+            <input placeholder="Beschreibung" bind:value={edititem.description}><br>
+            {#each projects as project}
+            <label><input type="checkbox" value="{project}" name="projects" bind:group={edititem.projects}>{project}</label>
+            {/each}<br>
+            {#each contexts as context}
+            <label><input type="checkbox" value="{context}" name="contexts" bind:group={edititem.contexts}>{context}</label>
+            {/each}<br>
+            Fällig: <input type="date" name="due" bind:value={edititem.due}><br>
+            <button value="speichern">Speichern</button>
+            <button value="loeschen">Löschen</button>
+            <button value="abbrechen">Abbrechen</button>
+    </form></dialog>
+</div>
 
 <style>
     div {
@@ -116,8 +172,11 @@
         --color-eg: color(from lightgreen srgb r g b / 1);
     }
 
-    :global(svg text) {
+    :global(body, svg text) {
         font-family: sans-serif;
+    }
+
+    :global(svg text) {
         user-select: none;
     }
 
@@ -136,5 +195,20 @@
     }
     :global(.projectEG.projectOG ellipse) {
         fill: url(#diagonal-stripe-3);
+    }
+
+    dialog {
+        line-height: 2;
+    }
+
+    ::backdrop {
+      background-image: linear-gradient(
+        45deg,
+        magenta,
+        rebeccapurple,
+        dodgerblue,
+        green
+      );
+      opacity: 0.75;
     }
 </style>

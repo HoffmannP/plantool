@@ -2,16 +2,16 @@
 
 Items
 * Add
-* Rename
-* Remove
 * Complete
-* Project
-* Flag
-* Due
-
-Dependencies
-* Add
-* Remove
+* Edit
+    * Rename
+    * Project
+    * Flag
+    * Due
+    * Remove
+    * Dependencies
+        * Add
+        * Remove
 
 Planer
 * Load

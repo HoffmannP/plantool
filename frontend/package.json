@@ -33,7 +33,8 @@
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@viz-js/viz": "^3.4.0",
 		"beercss": "^3.5.1",
-		"debounce": "^2.0.0"
+		"debounce": "^2.0.0",
+		"hotkeys-js": "^3.13.7"
 	},
 	"license": "GPL-3.0-or-later"
 }
