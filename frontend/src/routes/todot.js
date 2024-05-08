@@ -1,10 +1,16 @@
 import { instance } from '@viz-js/viz'
+import pDebounce from 'p-debounce'
 
 let viz
 
-export async function generateSvg (edges, todos) {
+export const generateSvg = pDebounce(_generateSvg, 500)
+
+async function _generateSvg (edges, todos) {
   if (viz === undefined) {
     viz = await instance()
+  }
+  if (Object.keys(edges).length == 0) {
+    return null
   }
 
   const nodes = Object.fromEntries(Object.entries(todos).map(([id, i]) => [id, {

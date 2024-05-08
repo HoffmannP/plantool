@@ -1,17 +1,8 @@
 # Missing features
 
-Items
+Dependencies
 * Add
-* Complete
-* Edit
-    * Rename
-    * Project
-    * Flag
-    * Due
-    * Remove
-    * Dependencies
-        * Add
-        * Remove
+* Remove
 
 Planer
 * Load
