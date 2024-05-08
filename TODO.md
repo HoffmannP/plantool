@@ -1,10 +1,11 @@
 # Missing features
 
-Dependencies
-* Add
-* Remove
+Display
+* Show
+    Due
+    Contexts
 
 Planer
-* Load
 * Print/Export
-* Save
+* Multiple projecs/login/encrypt
+* Define colors for Projects

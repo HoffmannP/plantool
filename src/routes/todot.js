@@ -5,13 +5,20 @@ let viz
 
 export const generateSvg = pDebounce(_generateSvg, 500)
 
-async function _generateSvg (edges, todos) {
+async function _generateSvg (connections, todos) {
   if (viz === undefined) {
     viz = await instance()
   }
-  if (Object.keys(edges).length == 0) {
+  if (Object.keys(todos).length == 0) {
     return null
   }
+
+  const edges = Object.fromEntries(Object.entries(connections).map(([id, tos]) => [id, {
+    to: tos,
+    attr: {
+      class: todos[id].isCompleted ? 'completed' : []
+    }
+  }]))
 
   const nodes = Object.fromEntries(Object.entries(todos).map(([id, i]) => [id, {
     id: id,
@@ -19,7 +26,8 @@ async function _generateSvg (edges, todos) {
     class: [...i.projects.map(p => `project${p}`), i.isCompleted ? 'completed' : '']
   }]))
 
-  const svg = viz.renderSVGElement(dotcode(nodes, edges))
+  const code = dotcode(nodes, edges)
+  const svg = viz.renderSVGElement(code)
 
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
   // Source: https://iros.github.io/patternfills/sample_svg.html
@@ -33,18 +41,13 @@ async function _generateSvg (edges, todos) {
 }
 
 function dotcode (nodes, edges) {
-  /*
-    ratio = "0.7071067811865476"
-    size = "8.2731, 11.7000"
-    resolution = "300"
-    */
   return `digraph {
 rankdir = "LR"
 node [shape = "ellipse", fontsize = "10", fontname = "Lato regular", style="filled", fillcolor="white"]
 
 ${Object.entries(nodes).map(([k, v]) => `${k} [${attributeList(v)}]`).join('\n    ')}
 
-${Object.entries(edges).map(([k, v]) => `${k} -> {${v.join(' ')}}`).join('\n    ')}
+${Object.entries(edges).map(([k, v]) => `${k} -> {${v.to.join(' ')}} [${attributeList(v.attr)}]`).join('\n    ')}
 }`
 }
 
