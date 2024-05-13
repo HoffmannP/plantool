@@ -2,8 +2,12 @@ import adapter from '@sveltejs/adapter-node'
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-    kit: {
-        adapter: adapter()
+  kit: {
+    adapter: adapter(),
+    paths: {
+      assets: 'https://b-ranger.de/plantool',
+      base: '/plantool'
+    }
   },
   onwarn: (warning, handler) => {
     const IGNORE_WARNINGS = [
@@ -11,9 +15,9 @@ const config = {
     ]
     if (IGNORE_WARNINGS.includes(warning.code)) {
       return
-        }
-    handler(warning)
     }
+    handler(warning)
+  }
 }
 
 export default config
