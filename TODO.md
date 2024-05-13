@@ -1,19 +1,9 @@
 # Missing features
 
-Items
-* Add
-* Rename
-* Remove
-* Complete
-* Project
-* Flag
-* Due
-
-Dependencies
-* Add
-* Remove
+Display
+* Customize colors, projects etc.
 
 Planer
-* Load
 * Print/Export
-* Save
+* Auth/Enc
+* Mobile Navigation

@@ -10,10 +10,7 @@ KUBECTL="kubectl"
 
 if [[ "$1" != "--nobuild" ]]
 then
-    (
-        cd frontend
-        npm run build
-    )
+    npm run build
     buildah build -t "${SERVER_NAME}:latest" .
 else
     shift
