@@ -167,7 +167,72 @@
             svg = null
         }
         svg = await generateSvg(edges, mytodos)
+        svg = enhanceDrawing(svg)
         shortChange = false
+    }
+
+    function enhanceDrawing(svg) {
+        if (svg === null) {
+            return svg
+        }
+        if (svg.classList.contains('enhanced')) {
+            return svg
+        }
+
+        svg.classList.add('enhanced')
+        Object.entries(todos).filter(([_, i]) => i.due).forEach(function ([id, i]) {
+            const item = svg.querySelector(`#${id}`)
+            const ellipse = item.querySelector('ellipse')
+
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+            const x = ellipse.cx.baseVal.value + ellipse.rx.baseVal.value - 50
+            const y = ellipse.cy.baseVal.value + ellipse.ry.baseVal.value - 5
+            group.setAttribute('transform', `translate(${x}, ${y})`)
+            item.appendChild(group)
+
+            const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            box.classList.add('due')
+            box.setAttribute('rx', 5)
+            box.setAttribute('width', 57)
+            box.setAttribute('height', 12)
+            group.appendChild(box)
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            text.classList.add('due')
+            text.setAttribute('dx', 3)
+            text.setAttribute('dy', 9)
+            text.innerHTML = i.due
+            group.appendChild(text)
+        })
+
+        Object.entries(todos).filter(([_, i]) => i.contexts.length > 0).forEach(function ([id, i]) {
+            const item = svg.querySelector(`#${id}`)
+            const ellipse = item.querySelector('ellipse')
+            const widthfactor = 6
+
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+            const x = ellipse.cx.baseVal.value - i.contexts.join(' ').length * widthfactor/2
+            const y = ellipse.cy.baseVal.value - ellipse.ry.baseVal.value - 5
+            group.setAttribute('transform', `translate(${x}, ${y})`)
+            item.appendChild(group)
+
+            const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            box.classList.add('context')
+            box.setAttribute('rx', 0)
+            box.setAttribute('width', i.contexts.join(' ').length * widthfactor)
+            box.setAttribute('height', 13)
+            group.appendChild(box)
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            text.classList.add('context')
+            text.setAttribute('dx', 3)
+            text.setAttribute('dy', 9)
+            text.innerHTML = i.contexts.join(' ')
+            group.appendChild(text)
+        })
+
+
+        return svg
     }
 
     function select(id) {
@@ -213,7 +278,7 @@
     }
 
     function save () {
-        fetch('./', { method: 'POST', body: JSON.stringify(todos) })
+        fetch('', { method: 'POST', body: JSON.stringify(todos) })
     }
 </script>
 
@@ -273,6 +338,23 @@
 
     :global(svg text) {
         user-select: none;
+    }
+
+    :global(svg text.due) {
+        font-size: 10px;
+        fill: darkslategray
+    }
+    :global(svg rect.due) {
+        fill: white;
+        stroke: darkslategray;
+    }
+
+    :global(svg text.context) {
+        font-size: 10px;
+        fill: white
+    }
+    :global(svg rect.context) {
+        fill: rebeccapurple;
     }
 
     :global(.projectOG ellipse) {

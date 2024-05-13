@@ -1,3 +1,7 @@
 #!/bin/bash
 
-npm run dev -- --open
+while true
+do
+    # not --open
+    npm run dev --
+done

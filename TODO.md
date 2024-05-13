@@ -1,11 +1,8 @@
 # Missing features
 
 Display
-* Show
-    Due
-    Contexts
+* Customize colors, projects etc.
 
 Planer
 * Print/Export
-* Multiple projecs/login/encrypt
-* Define colors for Projects
+* Auth/Enc
