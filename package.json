@@ -30,6 +30,7 @@
 	"type": "module",
 	"dependencies": {
 		"@ochuzor/todo.txt-parser": "^3.2.2",
+		"@sveltejs/adapter-node": "^5.0.1",
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@viz-js/viz": "^3.4.0",
 		"beercss": "^3.5.1",
