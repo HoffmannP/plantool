@@ -57,9 +57,79 @@
 
     function initKeys () {
         hotkeys('Del', preventDefaultWrapper(completeNode))
+        hotkeys('shift+left', selectPrevNode)
+        hotkeys('shift+right', selectNextNode)
+        hotkeys('shift+down', selectPrevEdge)
+        hotkeys('shift+top', selectNextEdge)
         hotkeys('Enter', preventDefaultWrapper(edit))
         hotkeys('-', preventDefaultWrapper(editEdge))
         hotkeys('s', save)
+    }
+
+    function selectPrevNode() {
+        if (!selected) {
+            return select(Object.keys(todos)[0])
+        }
+
+        let prev = selected.previousElementSibling
+        while (!prev.classList.contains('node')) {
+            if (prev.previousElementSibling === null) {
+                const children = prev.parentElement.children
+                prev = children[children.length - 1]
+            } else {
+                prev = prev.previousElementSibling
+            }
+        }
+        select(prev)
+    }
+
+    function selectNextNode() {
+        if (!selected) {
+            return select(Object.keys(todos)[0])
+        }
+
+        let next = selected.nextElementSibling
+        while (!next.classList.contains('node')) {
+            if (next.nextElementSibling === null) {
+                next = next.parentElement.children[0]
+            } else {
+                next = next.nextElementSibling
+            }
+        }
+        select(next)
+    }
+
+    function selectPrevEdge() {
+        if (!selected) {
+            return select(Object.keys(todos)[0])
+        }
+
+        let prev = selected.previousElementSibling
+        while (!prev.classList.contains('edge')) {
+            if (prev.previousElementSibling === null) {
+                const children = prev.parentElement.children
+                prev = children[children.length - 1]
+            } else {
+                prev = prev.previousElementSibling
+            }
+        }
+        select(prev)
+    }
+
+    function selectNextEdge() {
+        if (!selected) {
+            return select(Object.keys(todos)[0])
+        }
+
+        let next = selected.nextElementSibling
+        while (!next.classList.contains('edge')) {
+            if (next.nextElementSibling === null) {
+                next = next.parentElement.children[0]
+            } else {
+                next = next.nextElementSibling
+            }
+        }
+        select(next)
     }
 
     function completeNode () {
@@ -252,6 +322,7 @@
             }
             selected = node
         }
+        console.log(selected.id)
         selected.classList.add('selected')
     }
 
@@ -284,7 +355,7 @@
 
 <div>
     {#if svg}
-    <div transition=fade on:click={klicked}>{@html svg.outerHTML}</div>
+    <picture role="presentation" transition=fade on:click={klicked}>{@html svg.outerHTML}</picture>
     {/if}
 
     <dialog clas="node" bind:this={nodeDialog} on:close={updateNode}><form method="dialog">
