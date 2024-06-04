@@ -36,11 +36,10 @@
             Object.fromEntries(elements.map(k => [k, []]))
         )
     }
+
     function allCategories(elements, category) {
         return Array.from(new Set(elements.map(i => todos[i][category]).flat()))
     }
-
-    onMount(init)
 
     function preventDefaultWrapper(callback) {
         return function (event) {
@@ -54,6 +53,7 @@
         todos = data.todos
         initKeys()
     }
+    onMount(init)
 
     function initKeys () {
         hotkeys('Del', preventDefaultWrapper(completeNode))
