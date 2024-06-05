@@ -9,7 +9,7 @@ HTML_DIR=html/plantool
 # cp plantool.ini $SERVER:etc/services.d/plantool.ini
 # supervisorctl update
 # supervisorctl start
-# uberspace web backend set /plantool --http --port 3010 --remove-prefix
+# uberspace web backend set /plantool --http --port 3010
 
 # # sync todos
 # rsync -avp todos $SERVER:$HTML_DIR/todos
