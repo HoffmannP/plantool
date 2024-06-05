@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { createHash as cryptoCreateHash } from 'node:crypto'
+import { basename } from 'node:path'
 
 const DIRECTORY = 'todos'
 const RAND = '77s3ZH0XGOfHSlBP2H33HpQCsTOpXR'
@@ -39,4 +40,22 @@ export function checkPassword (project, password) {
 
 export function projectEntries (projectDir) {
   return readdirSync(`${DIRECTORY}/${projectDir}`)
+}
+
+export function getContent ({ project, pwhash, file}) {
+  const filepath = `${DIRECTORY}/${project}/${pwhash}/${file}/todo.txt`
+  if (!existsSync(filepath)) {
+    return ''
+  }
+  return readFileSync(filepath, { encoding: 'UTF8' })
+}
+
+export function setContent({ project, pwhash, file}, content) {
+  const filepath = `${DIRECTORY}/${project}/${pwhash}/${file}/todo.txt`
+  const newName = `todo-${Date.now()}.txt`
+  const newPath = `${DIRECTORY}/${project}/${pwhash}/${file}/${newName}`
+
+  writeFileSync(newPath, content)
+  unlinkSync(filepath)
+  symlinkSync(newName, filepath)
 }
