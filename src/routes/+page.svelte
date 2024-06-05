@@ -12,11 +12,11 @@
         <form method="POST" action="?/login" use:enhance>
             <div>
                 <label for="project">Project</label>
-                <input type="text" name="project">
+                <input type="text" name="project" autocomplete="username" required>
             </div>
             <div>
                 <label for="password">Password</label>
-                <input type="password" name="password">
+                <input type="password" name="password" autocomplete="current-password" required>
             </div>
             <div>
                 <button>Open</button>

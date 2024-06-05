@@ -21,11 +21,12 @@
     {/if}
     <div>
         <label for="password">Password</label>
-        <input type="password" bind:value={password} name="password">
+        <input type="password" bind:value={password} name="password" autocomplete="new-password">
     </div>
     <div>
         <label for="pwconfirm">Password Confirmation</label>
-        <input type="password" bind:value={pwconfirm} name="pwconfirm">
+        <input type="password" bind:value={pwconfirm} name="pwconfirm" autocomplete="new-password"
+        >
     </div>
     <div>
         <button disabled={!readyToSend}>Create project <em>{data.project}</em></button>

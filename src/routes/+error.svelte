@@ -2,6 +2,8 @@
     import { page } from '$app/stores'
     import { base } from '$app/paths'
 
+    console.log($page)
+
 </script>
 
 {#if $page.error.type == 'project not found'}

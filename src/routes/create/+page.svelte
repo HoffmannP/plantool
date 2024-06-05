@@ -14,14 +14,14 @@
     <form method="POST" action="?/create" use:enhance>
         <div>
             <label for="project">Project</label>
-            <input type="text" name="project">
+            <input type="text" name="project" autocomplete="username">
         </div>
         {#if (showWarning)}
         <div>Passwords don't match</div>
         {/if}
         <div>
             <label for="password">Password</label>
-            <input type="password" bind:value={password} name="password">
+            <input type="password" bind:value={password} name="password" autocomplete="new-password">
         </div>
         <div>
             <label for="pwconfirm">Password Confirmation</label>
