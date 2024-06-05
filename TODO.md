@@ -5,5 +5,5 @@ Display
 
 Planer
 * Print/Export
-* Auth/Enc
 * Mobile Navigation
+* Kummulieren & Panaschieren

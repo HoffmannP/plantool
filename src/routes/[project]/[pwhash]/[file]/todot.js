@@ -3,9 +3,9 @@ import pDebounce from 'p-debounce'
 
 let viz
 
-export const generateSvg = pDebounce(_generateSvg, 500)
+export default pDebounce(generateSvg, 500)
 
-async function _generateSvg (connections, todos) {
+async function generateSvg (connections, todos) {
   if (viz === undefined) {
     viz = await instance()
   }
@@ -13,18 +13,22 @@ async function _generateSvg (connections, todos) {
     return null
   }
 
-  const edges = Object.fromEntries(Object.entries(connections).map(([id, tos]) => [id, {
-    to: tos,
-    attr: {
-      class: todos[id].isCompleted ? 'completed' : []
-    }
-  }]))
+  const edges = Object.fromEntries(Object.entries(connections).map(
+    ([id, tos]) => [id, {
+      to: tos,
+      attr: {
+        class: todos[id].isCompleted ? 'completed' : []
+      }
+    }]
+  ))
 
-  const nodes = Object.fromEntries(Object.entries(todos).map(([id, i]) => [id, {
-    id: id,
-    label: i.description,
-    class: [...i.projects.map(p => `project${p}`), i.isCompleted ? 'completed' : '']
-  }]))
+  const nodes = Object.fromEntries(Object.entries(todos).map(
+    ([id, i]) => [id, {
+      id: id,
+      label: i.description,
+      class: [...i.projects.map(p => `project${p}`), i.isCompleted ? 'completed' : '']
+    }]
+  ))
 
   const code = dotcode(nodes, edges)
   const svg = viz.renderSVGElement(code)

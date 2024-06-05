@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte"
     import hotkeys from 'hotkeys-js'
-    import { generateSvg } from './todot.js'
+    import generateSvg from './todot.js'
     import { generateItemId, nowDate } from './todo.helper.js'
 
     export let data
@@ -17,12 +17,13 @@
     let newContexts = ''
     let editedge = {}
     let shortChange = false
+    let showComplete = false
 
     $: items = Object.keys(todos).toSorted()
     $: edges = buildEdges(items)
     $: projects = allCategories(items, 'projects')
     $: contexts = allCategories(items, 'contexts')
-    $: draw(todos)
+    $: draw(todos, showComplete)
 
     function buildEdges(elements) {
         return elements.reduce(
@@ -64,6 +65,11 @@
         hotkeys('Enter', preventDefaultWrapper(edit))
         hotkeys('-', preventDefaultWrapper(editEdge))
         hotkeys('s', save)
+        hotkeys('ctrl+m', toggleComplete)
+    }
+
+    function toggleComplete () {
+        showComplete = !showComplete
     }
 
     function selectPrevNode() {
@@ -236,7 +242,18 @@
         if (!shortChange) {
             svg = null
         }
-        svg = await generateSvg(edges, mytodos)
+
+        svg = await generateSvg(
+            showComplete
+                ? edges
+                : Object.fromEntries(Object.entries(edges).filter(
+                    ([from, _]) => !(mytodos[from].isCompleted)
+                )),
+            showComplete
+                ? mytodos
+                : Object.fromEntries(Object.entries(mytodos).filter(
+                    ([_, todo]) => !(todo.isCompleted)
+                )))
         svg = enhanceDrawing(svg)
         shortChange = false
     }
@@ -250,7 +267,7 @@
         }
 
         svg.classList.add('enhanced')
-        Object.entries(todos).filter(([_, i]) => i.due).forEach(function ([id, i]) {
+        Object.entries(todos).filter(([_, i]) => i.due && !i.isCompleted).forEach(function ([id, i]) {
             const item = svg.querySelector(`#${id}`)
             const ellipse = item.querySelector('ellipse')
 
@@ -275,7 +292,7 @@
             group.appendChild(text)
         })
 
-        Object.entries(todos).filter(([_, i]) => i.contexts.length > 0).forEach(function ([id, i]) {
+        Object.entries(todos).filter(([_, i]) => i.contexts.length > 0 && !i.isCompleted).forEach(function ([id, i]) {
             const item = svg.querySelector(`#${id}`)
             const ellipse = item.querySelector('ellipse')
             const widthfactor = 6
