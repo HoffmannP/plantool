@@ -1,7 +1,8 @@
 <script>
     import { onMount } from "svelte"
     import hotkeys from 'hotkeys-js'
-    import generateSvg from './todot.js'
+    import generateSvg from '$lib/toDotviz.js'
+    // import generateSvg from '$lib/toMermaid.js'
     import { generateItemId, nowDate } from './todo.helper.js'
 
     export let data
@@ -294,6 +295,7 @@
 
         Object.entries(todos).filter(([_, i]) => i.contexts.length > 0 && !i.isCompleted).forEach(function ([id, i]) {
             const item = svg.querySelector(`#${id}`)
+            if (!item) return
             const ellipse = item.querySelector('ellipse')
             const widthfactor = 6
 
@@ -445,12 +447,15 @@
         fill: rebeccapurple;
     }
 
-    :global(.projectOG ellipse) {
+    :global(.projectOG ellipse),
+    :global(#graphDiv .node.projectOG rect) {
         fill: var(--color-og);
     }
-    :global(.projectEG ellipse) {
+    :global(.projectEG ellipse),
+    :global(#graphDiv .node.projectEG rect) {
         fill: var(--color-eg);
     }
+
     :global(.completed) {
         opacity: .2;
     }
