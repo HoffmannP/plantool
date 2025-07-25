@@ -24,6 +24,7 @@ buildah push "$SERVER_NAME:$VERSION"
 if [[ "$1" != "--nodeploy" ]]
 then
     $KUBECTL -n $NAMESPACE rollout restart deploy $NAME
+    $KUBECTL -n $NAMESPACE rollout status -w deployment.apps/$SERVICE
 else
     shift
 fi
